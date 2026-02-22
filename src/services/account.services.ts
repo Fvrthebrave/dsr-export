@@ -70,7 +70,7 @@ export async function recordTransfer(fromAccountId: number, toAccountId: number,
         SELECT id FROM accounts
         WHERE id IN ($1, $2)
         ORDER BY id
-        FOR UPDATE
+        FOR UPDATE;
       `, [firstId, secondId])
 
       if(lockResult.rowCount !== 2) {

@@ -6,8 +6,9 @@ BEGIN;
 -- =========================
 CREATE TABLE IF NOT EXISTS accounts (
     id SERIAL PRIMARY KEY,
-    balance_cents INTEGER NOT NULL DEFAULT 0,
-    created_at TIMESTAMP NOT NULL DEFAULT NOW()
+    balance BIGINT NOT NULL DEFAULT 0,
+    created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+    CONSTRAINT balance_non_negative CHECK (balance >= 0)
 );
 
 -- =========================
