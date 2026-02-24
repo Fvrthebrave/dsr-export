@@ -1,5 +1,13 @@
 import { pool } from '../db';
 
+interface StatementParams {
+  accountId: number;
+  from: string;
+  to: string;
+  page: number;
+  pageSize: number;
+}
+
 export async function recordPayment(accountId: number, amount: number, externalPaymentId: string) {
   const client = await pool.connect();
 
@@ -51,7 +59,8 @@ export async function recordTransfer(fromAccountId: number, toAccountId: number,
     const transferResult = await client.query(`
         INSERT INTO transfers (from_id, to_id, amount_cents, external_transfer_id)
         VALUES ($1, $2, $3, $4)
-        ON CONFLICT (external_transfer_id) DO NOTHING
+        ON CONFLICT (external_transfer_id) 
+        DO NOTHING
         RETURNING *
       `, [fromAccountId, toAccountId, amount, transferId]);
 
@@ -117,5 +126,49 @@ export async function recordTransfer(fromAccountId: number, toAccountId: number,
     throw err;
   } finally {
     client.release();
+  }
+}
+
+export async function getAccountStatement({
+  accountId,
+  from,
+  to,
+  page,
+  pageSize
+}: StatementParams) {
+
+  const offset = (page - 1) * pageSize;
+
+  const result = await pool.query(`
+      SELECT
+        t.id,
+        t.amount,
+        t.trans_type,
+        t.created_at,
+        t.transfer_id
+      FROM transactions t
+      WHERE t.ccount_id = $1
+        AND t.created_at BETWEEN $2 AND $3
+        ORDER by t.created_at DESC
+        LIMIT $4 OFFSET $5
+    `,[accountId, from, to, pageSize, offset]);
+
+    if(result.rowCount === 0) {
+      throw new Error('No matching transactions found for the supplied accountId and/or date range');
+    }
+
+  const countResult = await pool.query(`
+      SELECT COUNT(*)
+      FROM transactions
+      WHERE account_id = $1
+        AND created_at BETWEEN $2 AND $3
+    `,[accountId, from, to])
+
+  return {
+    accountId,
+    page,
+    pageSize,
+    totalRecords: Number(countResult.rows[0].count),
+    transactions: result.rows
   }
 }

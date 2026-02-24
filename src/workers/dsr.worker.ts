@@ -72,7 +72,7 @@ async function handleExport(exportRow: any) {
         reportDate: exportRow.report_date,
         totalSales: Number(exportRow.total_sales),
         tax: Number(exportRow.tax),
-        idempotencyKey: `${exportRow.storeId}-${exportRow.report_date}`
+        idempotencyKey: `${exportRow.store_id}-${exportRow.report_date}`
       })
     );
 
