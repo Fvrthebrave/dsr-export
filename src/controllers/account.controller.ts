@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { recordPayment, recordTransfer } from  '../services/account.services';
+import { recordPayment, recordTransfer, getAccountStatement } from  '../services/account.services';
 
 export async function handleRecordPayment(req: Request, res: Response) {
   try {
@@ -29,5 +29,33 @@ export async function handlePaymentTransfer(req: Request, res: Response) {
     res.json(result);
   } catch(err: any) {
       res.status(err.status ?? 500).json({ err: err.message });
+  }
+}
+
+export async function getAccountStatement(req: Request, res: Response) {
+  try {
+    const accountId = Number(req.params.accountId);
+
+    const { from, to, page ='1', pageSize = '20' } = req.query;
+
+    if(!accountId || isNaN(accountId)) {
+      return res.status(400).json({ message: 'Invalid accountId' });
+    }
+
+    if(!from || !to) {
+      return res.status(400).json({ message: 'from and to dates are required' });
+    }
+
+    const result = await getAccountStatement({
+      accountId,
+      from: String(from),
+      to: String(to),
+      page: Number(page),
+      size: Number(pageSize)
+    });
+
+    res.json(result);
+  } catch(err: any) {
+    res.status(500).json({ err: err.message });
   }
 }
