@@ -3,9 +3,9 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "dev": "ts-node-dev src/server.ts",
-    "build": "tsc",
-    "start": "node dist/server.js"
+    "dev": "node init && ts-node-dev src/server.ts",
+    "build": "node init && tsc",
+    "start": "node init && node dist/server.js"
   },
   "keywords": [],
   "author": "",
@@ -13,8 +13,9 @@
   "description": "",
   "dependencies": {
     "cheerio": "^1.2.0",
-    "dotenv": "^17.3.1",
+    "dotenv": "^8.2.0",
     "express": "^5.2.1",
+    "node-fetch": "^3.3.2",
     "pg": "^8.18.0"
   },
   "devDependencies": {
